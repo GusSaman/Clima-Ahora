@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="es" data-time="night" data-weather="clear">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Clima actual de cualquier ciudad del mundo, con fondo dinámico de día y de noche." />
+  <meta name="theme-color" content="#0a1424" />
+  <title>Clima Ahora</title>
+
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='30' fill='%23ffd166'/%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sora:wght@600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <!-- Capas del fondo animado: dos capas que se cruzan con un fundido al cambiar de ciudad. -->
+  <div class="sky" aria-hidden="true">
+    <div class="sky__layer" id="sky-a"></div>
+    <div class="sky__layer" id="sky-b"></div>
+    <div class="sky__stars"></div>
+    <div class="sky__vignette"></div>
+  </div>
+
+  <main class="app">
+    <header class="topbar">
+      <a class="brand" href="./" aria-label="Clima Ahora, inicio">
+        <svg class="brand__mark" viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="12" cy="12" r="4.2" fill="currentColor" />
+          <g stroke="currentColor" stroke-width="1.7" stroke-linecap="round">
+            <path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.2 5.2l1.6 1.6M17.2 17.2l1.6 1.6M18.8 5.2l-1.6 1.6M6.8 17.2l-1.6 1.6" />
+          </g>
+        </svg>
+        <span class="brand__name">Clima<span>Ahora</span></span>
+      </a>
+
+      <div class="unit" role="group" aria-label="Unidad de temperatura">
+        <button type="button" class="unit__btn is-active" data-unit="c" aria-pressed="true">°C</button>
+        <button type="button" class="unit__btn" data-unit="f" aria-pressed="false">°F</button>
+      </div>
+    </header>
+
+    <section class="search" aria-label="Buscador de ciudades">
+      <div class="search__field">
+        <form id="search-form" class="search__form" role="search" autocomplete="off">
+          <span class="search__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <circle cx="11" cy="11" r="7" />
+              <path d="m20 20-3.6-3.6" />
+            </svg>
+          </span>
+
+          <label class="sr-only" for="city-input">Nombre de la ciudad</label>
+          <input
+            id="city-input"
+            class="search__input"
+            name="city"
+            type="text"
+            placeholder="Busca una ciudad…"
+            autocomplete="off"
+            autocapitalize="words"
+            spellcheck="false"
+            role="combobox"
+            aria-expanded="false"
+            aria-controls="suggestions"
+            aria-autocomplete="list"
+          />
+
+          <button type="submit" class="search__btn">
+            <span class="search__btn-label">Buscar</span>
+            <span class="spinner" aria-hidden="true"></span>
+          </button>
+        </form>
+
+        <ul id="suggestions" class="suggestions" role="listbox" aria-label="Sugerencias de ciudades" hidden></ul>
+      </div>
+
+      <p id="status" class="status" role="status" aria-live="polite"></p>
+    </section>
+
+    <section id="loader" class="loader" hidden>
+      <span class="spinner spinner--lg" aria-hidden="true"></span>
+      <p>Consultando el cielo…</p>
+    </section>
+
+    <article id="weather" class="weather" hidden aria-live="polite">
+      <div class="weather__top">
+        <div class="weather__place">
+          <h1 id="place-name" class="weather__city">—</h1>
+          <p id="place-meta" class="weather__meta"></p>
+        </div>
+        <div class="weather__time">
+          <span id="local-time" class="weather__clock">--:--</span>
+          <span id="local-zone" class="weather__zone">hora local</span>
+        </div>
+      </div>
+
+      <div class="weather__hero">
+        <div id="weather-icon" class="weather__icon" aria-hidden="true">☀️</div>
+        <div class="weather__temp-wrap">
+          <p class="weather__temp">
+            <span id="temp">--</span><span id="temp-unit" class="weather__deg">°C</span>
+          </p>
+          <p id="condition" class="weather__condition"></p>
+        </div>
+      </div>
+
+      <div class="weather__details">
+        <div class="detail">
+          <span class="detail__icon" aria-hidden="true">💧</span>
+          <div class="detail__text">
+            <span class="detail__label">Humedad</span>
+            <span id="humidity" class="detail__value">—</span>
+          </div>
+        </div>
+
+        <div class="detail">
+          <span class="detail__icon" aria-hidden="true">💨</span>
+          <div class="detail__text">
+            <span class="detail__label">Viento</span>
+            <span id="wind" class="detail__value">—</span>
+          </div>
+        </div>
+
+        <div class="detail">
+          <span class="detail__icon" aria-hidden="true">🌡️</span>
+          <div class="detail__text">
+            <span class="detail__label">Sensación</span>
+            <span id="feels" class="detail__value">—</span>
+          </div>
+        </div>
+
+        <div class="detail">
+          <span id="sun-icon" class="detail__icon" aria-hidden="true">🌅</span>
+          <div class="detail__text">
+            <span id="sun-label" class="detail__label">Amanecer</span>
+            <span id="sun-value" class="detail__value">—</span>
+          </div>
+        </div>
+      </div>
+
+      <footer class="weather__foot">
+        <span id="updated" class="weather__updated"></span>
+        <span class="weather__credit">Datos de <a href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer">Open-Meteo</a></span>
+      </footer>
+    </article>
+  </main>
+
+  <script src="app.js" defer></script>
+</body>
+</html>
